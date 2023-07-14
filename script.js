@@ -45,21 +45,24 @@ document.getElementById('user-form').addEventListener('submit', function(event) 
         var listItem = document.createElement('li');
         listItem.textContent = "Name: " + formData.name + ", Email: " + formData.email + ", Phone: " + formData.phone;
   
+        var editButton = document.createElement('button');
+        editButton.textContent = 'Edit';
+        editButton.dataset.key = key; // Set the key as a data attribute
+        editButton.addEventListener('click', function(event) {
+          var keyToEdit = event.target.dataset.key;
+          editData(keyToEdit);
+        });
+        listItem.appendChild(editButton);
+  
         var deleteButton = document.createElement('button');
         deleteButton.textContent = 'Delete';
         deleteButton.dataset.key = key; // Set the key as a data attribute
-  
-        // Add a click event listener to the delete button
         deleteButton.addEventListener('click', function(event) {
           var keyToDelete = event.target.dataset.key;
-          localStorage.removeItem(keyToDelete);
-          displayData(); // Update the displayed list after deletion
+          deleteData(keyToDelete);
         });
-  
-        // Append the delete button to the list item
         listItem.appendChild(deleteButton);
   
-        // Append the list item to the unordered list
         dataList.appendChild(listItem);
   
         hasAppointments = true; // There is at least one appointment
@@ -72,6 +75,21 @@ document.getElementById('user-form').addEventListener('submit', function(event) 
       noAppointmentsMessage.classList.add('no-appointments'); // Add the CSS class
       dataList.appendChild(noAppointmentsMessage);
     }
+  }
+  
+  function deleteData(key) {
+    localStorage.removeItem(key);
+    displayData();
+  }
+  
+  function editData(key) {
+    var formData = JSON.parse(localStorage.getItem(key));
+    document.getElementById('name').value = formData.name;
+    document.getElementById('email').value = formData.email;
+    document.getElementById('phone').value = formData.phone;
+  
+    // Remove the data from local storage after editing
+    localStorage.removeItem(key);
   }
   
   // Load and display the stored user data on page load

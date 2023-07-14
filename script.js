@@ -1,59 +1,79 @@
-document.getElementById('user-form').addEventListener('submit', function (event) {
+document.getElementById('user-form').addEventListener('submit', function(event) {
     event.preventDefault(); // Prevent default form submission
-
+  
     var name = document.getElementById('name').value;
     var email = document.getElementById('email').value;
     var phone = document.getElementById('phone').value;
-
+  
     var formData = {
-        name: name,
-        email: email,
-        phone: phone
+      name: name,
+      email: email,
+      phone: phone
     };
-
-    // Save the form data to local storage
-    saveFormData(formData);
-
-    var displayArea = document.getElementById('display-area');
-
-    // Create new elements for the form data
-    var nameElement = document.createElement('p');
-    nameElement.innerHTML = "<strong>Name:</strong> " + name;
-
-    var emailElement = document.createElement('p');
-    emailElement.innerHTML = "<strong>Email:</strong> " + email;
-
-    var phoneElement = document.createElement('p');
-    phoneElement.innerHTML = "<strong>Phone:</strong> " + phone;
-
-    // Add spacing between the form data
-    var spacingElement = document.createElement('hr');
-
-    // Append the new elements to the display area
-    displayArea.appendChild(nameElement);
-    displayArea.appendChild(emailElement);
-    displayArea.appendChild(phoneElement);
-    displayArea.appendChild(spacingElement);
-
+  
+    // Generate a unique key
+    var uniqueKey = generateUniqueKey();
+  
+    // Save the form data with the unique key
+    localStorage.setItem(uniqueKey, JSON.stringify(formData));
+  
+    // Display the stored user data
+    displayData();
+  
     // Clear the form input fields
     document.getElementById('name').value = '';
     document.getElementById('email').value = '';
     document.getElementById('phone').value = '';
-});
-
-function generateUniqueId() {
-    // Generate a unique identifier using timestamp or any other method
-    // Return the unique identifier
-    var timestamp = new Date().getTime();
-    return "user_" + timestamp;
+  });
+  
+  function generateUniqueKey() {
+    var timestamp = new Date().getTime(); // Generate a timestamp
+    return "formData_" + timestamp;
   }
   
-  function saveFormData(formData) {
-    var uniqueId = generateUniqueId(); // Generate a unique identifier
+  function displayData() {
+    var dataList = document.getElementById('data-list');
+    dataList.innerHTML = ''; // Clear the existing list
   
-    // Store data using unique key
-    localStorage.setItem(uniqueId, JSON.stringify(formData));
+    var hasAppointments = false; // Track if there are any appointments
+  
+    for (var i = 0; i < localStorage.length; i++) {
+      var key = localStorage.key(i);
+      if (key.startsWith('formData_')) {
+        var formData = JSON.parse(localStorage.getItem(key));
+  
+        var listItem = document.createElement('li');
+        listItem.textContent = "Name: " + formData.name + ", Email: " + formData.email + ", Phone: " + formData.phone;
+  
+        var deleteButton = document.createElement('button');
+        deleteButton.textContent = 'Delete';
+        deleteButton.dataset.key = key; // Set the key as a data attribute
+  
+        // Add a click event listener to the delete button
+        deleteButton.addEventListener('click', function(event) {
+          var keyToDelete = event.target.dataset.key;
+          localStorage.removeItem(keyToDelete);
+          displayData(); // Update the displayed list after deletion
+        });
+  
+        // Append the delete button to the list item
+        listItem.appendChild(deleteButton);
+  
+        // Append the list item to the unordered list
+        dataList.appendChild(listItem);
+  
+        hasAppointments = true; // There is at least one appointment
+      }
+    }
+  
+    if (!hasAppointments) {
+      var noAppointmentsMessage = document.createElement('li');
+      noAppointmentsMessage.textContent = 'OOPS..!! Currently No Appointments to show';
+      noAppointmentsMessage.classList.add('no-appointments'); // Add the CSS class
+      dataList.appendChild(noAppointmentsMessage);
+    }
   }
   
-  
+  // Load and display the stored user data on page load
+  displayData();
   

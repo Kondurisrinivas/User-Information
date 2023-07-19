@@ -1,14 +1,14 @@
 document.getElementById('user-form').addEventListener('submit', function(event) {
   event.preventDefault(); // Prevent default form submission
 
-  var amount = document.getElementById('amount').value;
-  var description = document.getElementById('description').value;
-  var catagory = document.getElementById('catagory').value;
+  var name = document.getElementById('name').value;
+  var email = document.getElementById('email').value;
+  var phone = document.getElementById('phone').value;
 
   var formData = {
-    amount: amount,
-    description: description,
-    catagory: catagory
+    name: name,
+    email: email,
+    phone: phone
   };
 
   // Generate a unique key
@@ -21,9 +21,9 @@ document.getElementById('user-form').addEventListener('submit', function(event) 
   displayData();
 
   // Clear the form input fields
-  document.getElementById('amount').value = '';
-  document.getElementById('description').value = '';
-  document.getElementById('catagory').value = '';
+  document.getElementById('name').value = '';
+  document.getElementById('email').value = '';
+  document.getElementById('phone').value = '';
 });
 
 function generateUniqueKey() {
@@ -35,7 +35,7 @@ function displayData() {
   var dataList = document.getElementById('data-list');
   dataList.innerHTML = ''; // Clear the existing list
 
-  var hasExpenses = false; // Track if there are any expenses
+  var hasAppointments = false; // Track if there are any appointments
 
   for (var i = 0; i < localStorage.length; i++) {
     var key = localStorage.key(i);
@@ -43,24 +43,10 @@ function displayData() {
       var formData = JSON.parse(localStorage.getItem(key));
 
       var listItem = document.createElement('li');
-
-      var amountLabel = document.createElement('strong');
-      amountLabel.textContent = "Amount: ";
-      listItem.appendChild(amountLabel);
-      listItem.innerHTML += formData.amount + ", ";
-
-      var descriptionLabel = document.createElement('strong');
-      descriptionLabel.textContent = "Description: ";
-      listItem.appendChild(descriptionLabel);
-      listItem.innerHTML += formData.description + ", ";
-
-      var categoryLabel = document.createElement('strong');
-      categoryLabel.textContent = "Category: ";
-      listItem.appendChild(categoryLabel);
-      listItem.innerHTML += formData.catagory;
+      listItem.textContent = "Name: " + formData.name + ", Email: " + formData.email + ", Phone: " + formData.phone;
 
       var editButton = document.createElement('button');
-      editButton.textContent = 'Edit Expense';
+      editButton.textContent = 'Edit';
       editButton.dataset.key = key; // Set the key as a data attribute
       editButton.addEventListener('click', function(event) {
         var keyToEdit = event.target.dataset.key;
@@ -69,7 +55,7 @@ function displayData() {
       listItem.appendChild(editButton);
 
       var deleteButton = document.createElement('button');
-      deleteButton.textContent = 'Delete Expense';
+      deleteButton.textContent = 'Delete';
       deleteButton.dataset.key = key; // Set the key as a data attribute
       deleteButton.addEventListener('click', function(event) {
         var keyToDelete = event.target.dataset.key;
@@ -79,15 +65,15 @@ function displayData() {
 
       dataList.appendChild(listItem);
 
-      hasExpenses = true; // There is at least one expense
+      hasAppointments = true; // There is at least one appointment
     }
   }
 
-  if (!hasExpenses) {
-    var noExpensesMessage = document.createElement('li');
-    noExpensesMessage.textContent = 'OOPS..!! Currently No Expenses to show';
-    noExpensesMessage.classList.add('no-appointments'); // Add the CSS class
-    dataList.appendChild(noExpensesMessage);
+  if (!hasAppointments) {
+    var noAppointmentsMessage = document.createElement('li');
+    noAppointmentsMessage.textContent = 'OOPS..!! Currently No Appointments to show';
+    noAppointmentsMessage.classList.add('no-appointments'); // Add the CSS class
+    dataList.appendChild(noAppointmentsMessage);
   }
 }
 
@@ -98,9 +84,9 @@ function deleteData(key) {
 
 function editData(key) {
   var formData = JSON.parse(localStorage.getItem(key));
-  document.getElementById('amount').value = formData.amount;
-  document.getElementById('description').value = formData.description;
-  document.getElementById('catagory').value = formData.catagory;
+  document.getElementById('name').value = formData.name;
+  document.getElementById('email').value = formData.email;
+  document.getElementById('phone').value = formData.phone;
 
   // Remove the data from local storage after editing
   localStorage.removeItem(key);

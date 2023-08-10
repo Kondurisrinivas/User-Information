@@ -11,14 +11,15 @@ document.getElementById('user-form').addEventListener('submit', function(event) 
     phone: phone
   };
 
-  // Generate a unique key
-  var uniqueKey = generateUniqueKey();
-
-  // Save the form data with the unique key
-  localStorage.setItem(uniqueKey, JSON.stringify(formData));
-
-  // Display the stored user data
-  displayData();
+  // Save the form data using the remote API
+  axios.post("https://crudcrud.com/api/1a6803b28ab44722a02fe52489ae4708/appointments", formData)
+    .then(res => {
+      console.log(res.data);
+      displayData(); // Refresh the displayed data after successful submission
+    })
+    .catch(err => {
+      console.log(err);
+    });
 
   // Clear the form input fields
   document.getElementById('name').value = '';
@@ -26,71 +27,59 @@ document.getElementById('user-form').addEventListener('submit', function(event) 
   document.getElementById('phone').value = '';
 });
 
-function generateUniqueKey() {
-  var timestamp = new Date().getTime(); // Generate a timestamp
-  return "formData_" + timestamp;
-}
-
 function displayData() {
   var dataList = document.getElementById('data-list');
   dataList.innerHTML = ''; // Clear the existing list
 
-  var hasAppointments = false; // Track if there are any appointments
+  // Fetch data from the remote API
+  axios.get("https://crudcrud.com/api/1a6803b28ab44722a02fe52489ae4708/appointments")
+    .then(res => {
+      var appointments = res.data;
+      var hasAppointments = false; // Track if there are any appointments
 
-  for (var i = 0; i < localStorage.length; i++) {
-    var key = localStorage.key(i);
-    if (key.startsWith('formData_')) {
-      var formData = JSON.parse(localStorage.getItem(key));
+      for (var key in appointments) {
+        var formData = appointments[key];
 
-      var listItem = document.createElement('li');
-      listItem.textContent = "Name: " + formData.name + ", Email: " + formData.email + ", Phone: " + formData.phone;
+        var listItem = document.createElement('li');
+        listItem.textContent = "Name: " + formData.name + ", Email: " + formData.email + ", Phone: " + formData.phone;
 
-      var editButton = document.createElement('button');
-      editButton.textContent = 'Edit';
-      editButton.dataset.key = key; // Set the key as a data attribute
-      editButton.addEventListener('click', function(event) {
-        var keyToEdit = event.target.dataset.key;
-        editData(keyToEdit);
-      });
-      listItem.appendChild(editButton);
+        var deleteButton = document.createElement('button');
+        deleteButton.textContent = 'Delete';
+        deleteButton.dataset.key = key; // Set the key as a data attribute
+        deleteButton.addEventListener('click', function(event) {
+          var keyToDelete = event.target.dataset.key;
+          deleteData(keyToDelete);
+        });
+        listItem.appendChild(deleteButton);
 
-      var deleteButton = document.createElement('button');
-      deleteButton.textContent = 'Delete';
-      deleteButton.dataset.key = key; // Set the key as a data attribute
-      deleteButton.addEventListener('click', function(event) {
-        var keyToDelete = event.target.dataset.key;
-        deleteData(keyToDelete);
-      });
-      listItem.appendChild(deleteButton);
+        dataList.appendChild(listItem);
 
-      dataList.appendChild(listItem);
+        hasAppointments = true; // There is at least one appointment
+      }
 
-      hasAppointments = true; // There is at least one appointment
-    }
-  }
-
-  if (!hasAppointments) {
-    var noAppointmentsMessage = document.createElement('li');
-    noAppointmentsMessage.textContent = 'OOPS..!! Currently No Appointments to show';
-    noAppointmentsMessage.classList.add('no-appointments'); // Add the CSS class
-    dataList.appendChild(noAppointmentsMessage);
-  }
+      if (!hasAppointments) {
+        var noAppointmentsMessage = document.createElement('li');
+        noAppointmentsMessage.textContent = 'OOPS..!! Currently No Appointments to show';
+        noAppointmentsMessage.classList.add('no-appointments'); // Add the CSS class
+        dataList.appendChild(noAppointmentsMessage);
+      }
+    })
+    .catch(err => {
+      console.log(err);
+    });
 }
 
 function deleteData(key) {
-  localStorage.removeItem(key);
-  displayData();
-}
-
-function editData(key) {
-  var formData = JSON.parse(localStorage.getItem(key));
-  document.getElementById('name').value = formData.name;
-  document.getElementById('email').value = formData.email;
-  document.getElementById('phone').value = formData.phone;
-
-  // Remove the data from local storage after editing
-  localStorage.removeItem(key);
+  // Delete data from the remote API using the provided key
+  axios.delete("https://crudcrud.com/api/1a6803b28ab44722a02fe52489ae4708/appointments/" + key)
+    .then(res => {
+      console.log(res.data);
+      displayData(); // Refresh the displayed data after successful deletion
+    })
+    .catch(err => {
+      console.log(err);
+    });
 }
 
 // Load and display the stored user data on page load
-displayData();
+// displayData();
